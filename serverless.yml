@@ -18,6 +18,6 @@ functions:
     handler: src/infrastructure/lambdas/handler.handler
     events:
       - http:
-          path: /clients
+          path: /utils/info
           method: post
           cors: true
