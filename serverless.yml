@@ -13,11 +13,11 @@ plugins:
   - serverless-offline
 
 functions:
-  createClient:
-    name: createClient
-    handler: src/infrastructure/lambdas/handler.handler
+  lambdaUtils:
+    name: lambdaUtils-${opt:stage, 'dev'}
+    handler: src/infrastructure/lambdas/handler.getUtilsDataHandler
     events:
       - http:
           path: /utils/info
-          method: post
+          method: get
           cors: true

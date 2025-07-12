@@ -1,32 +1,35 @@
 import { APIGatewayProxyHandler } from "aws-lambda";
-import { SupabaseClientRepository } from "../database/SupabaseClientRepository";
-import { CreateClient } from "../../application/use-cases/CreateClient";
+import { GetStatuses } from '../../application/use-cases/GetStatuses';
+import { SupabaseStatusRepository } from '../../infrastructure/database/SupabaseStatusRepository';
+import { GetAllTypeDocuments } from '../../application/use-cases/GetAllTypeDocuments';
+import { SupabaseTypeDocRepository } from '../../infrastructure/database/SupabaseTypeDocRepository';
 
-const clientRepository = new SupabaseClientRepository();
-const createClient = new CreateClient(clientRepository);
 
-export const handler: APIGatewayProxyHandler = async (event) => {
+const statusRepository = new SupabaseStatusRepository();
+const getStatuses = new GetStatuses(statusRepository);
+
+const typeDocumentRepository = new SupabaseTypeDocRepository();
+const getTypeDocuments = new GetAllTypeDocuments(typeDocumentRepository);
+
+import { corsResponse } from './CorsResponse';
+
+export const getUtilsDataHandler: APIGatewayProxyHandler = async (event) => {
   try {
-    const body = JSON.parse(event.body || "{}");
-    const { name, email } = body;
+    const statuses = await getStatuses.execute();
+    const typeDocuments = await getTypeDocuments.execute();
 
-    if (!name || !email) {
-      return {
-        statusCode: 400,
-        body: JSON.stringify({ message: "Name and email are required" }),
-      };
-    }
-
-    const client = await createClient.execute(name, email);
-
-    return {
-      statusCode: 201,
-      body: JSON.stringify(client),
-    };
+    return corsResponse(200, { data: {
+      transactionStatuses: statuses,
+      typeDocuments: typeDocuments 
+    }});
   } catch (error) {
-    return {
-      statusCode: 500,
-      body: JSON.stringify({ message: error instanceof Error ? error.message : "An unknown error occurred" }),
-    };
+    console.error('Error getting statuses:', error);
+    return corsResponse(500, {
+      error: {
+        code: "InternalServerError",
+        message: "An unexpected error occurred while retrieving statuses."
+      }
+    });
   }
 };
+
