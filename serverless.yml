@@ -14,10 +14,10 @@ plugins:
 
 functions:
   lambdaUtils:
-    name: lambdaUtils-${opt:stage, 'dev'}
-    handler: src/infrastructure/lambdas/handler.getUtilsDataHandler
+    name: lambdaValues-${opt:stage, 'dev'}
+    handler: src/infrastructure/lambdas/handler.getValuesHandler
     events:
       - http:
-          path: /utils/info
+          path: /values/all
           method: get
           cors: true
